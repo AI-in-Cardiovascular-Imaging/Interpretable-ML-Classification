@@ -7,9 +7,8 @@ import pandas as pd
 from boruta import BorutaPy
 import numpy as np
 
-
-
-
+""" Different Feature Selection strategies and their parameters are defined. """
+""" Two strategies are not used 'RFE' and 'Boruta' """
 class FeatureSelector:
     def __init__(self, method, n_features): 
         self.method = method
