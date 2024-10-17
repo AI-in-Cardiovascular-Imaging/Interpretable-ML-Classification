@@ -3,7 +3,7 @@ from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 import logging
 import matplotlib.pyplot as plt
 
-
+""" To identify different types of data, like numerical and categorical."""
 class DataIdentifier:
 
     def __init__(self, file_path):
