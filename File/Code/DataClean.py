@@ -48,7 +48,6 @@ class DataCleaner:
 
 
     def remove_zero_columns_rows(self):
-
         """Removing columns with all values 0"""
         cols_to_remove = [col for col in self.data_frame.columns if self.data_frame[col].isin([0]).all()]
         self.data_frame.drop(columns=cols_to_remove, inplace=True)
@@ -58,7 +57,7 @@ class DataCleaner:
         self.data_frame.drop(index=rows_to_remove, inplace=True)
         logger.info(f"Removed rows with all values 0: {rows_to_remove.tolist()}")
 
-    """Identify and Remove Outliers of data, based on chosen method."""
+    """Identify and Remove Outliers of data, based on chosen method (iqr or z-score)"""
     def identify_outliers(self, method='iqr', threshold=3):
         outliers = []
         numeric_columns = self.data_frame.select_dtypes(include=[np.number]).columns
