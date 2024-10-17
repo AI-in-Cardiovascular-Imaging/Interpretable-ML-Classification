@@ -167,91 +167,87 @@ class Plotting:
         plt.close() 
 
 
-    def bitmap(self, data, clf,  clf_name, output_folder, subset='train'):
 
-        data_subset = data.iloc[:, 0:15]
-        if data_subset.shape[0] != data_subset.shape[1]:
-            print("Warning: The subset is not square. Adjusting to the largest possible square subset.")
-            min_dim = min(data_subset.shape)
-            data_subset = data_subset.iloc[:min_dim, :min_dim]
-        plt.figure(figsize=(24, 20), dpi=300)
-        # data = data.iloc[:, 0:6]
-        sns.heatmap(data_subset, cmap='Blues', cbar=True, annot=True, linewidths=0.45, linecolor='black', center=True,
-                    annot_kws={"fontsize": 13, 'fontstyle': 'normal', 'color': 'black', "weight": "bold", "family": "serif"})
-        plt.title(f'Bitmap Plot')
-        plt.xticks(rotation = 90)
-        plt.yticks(rotation=0)
-        plt.savefig(os.path.join(output_folder, f"{clf_name} {clf} Bitmap plot {subset}.png"))
-        plt.close()
+"""After saving the output results of implementing ML models on data, give the path of final .csv file of results here, and choose which combination 
+plots you want to have in just one plot. In this study, just top 5 ROC curve for each combination plotted.
+"""
+import ast
+# file_path = 'D:\File\Results\TPR FPR values_Rest_GridSearch_IQR_Cleaned.csv'
+file_path = "F:\\Final Results\\NEW_RESULTS\\TPR FPR values_Combined_RandomSearch_Zscore_Cleaned.csv"
+data = pd.read_csv(file_path)
 
+"""convert string representations of lists into real lists"""
+def convert_to_list(list_string):
+    return ast.literal_eval(list_string)
 
+"""Converting values from str to list"""
+data['FPR_train'] = data['FPR_train'].apply(convert_to_list)
+data['TPR_train'] = data['TPR_train'].apply(convert_to_list)
+data['FPR_Test'] = data['FPR_Test'].apply(convert_to_list)
+data['TPR_Test'] = data['TPR_Test'].apply(convert_to_list)
 
-    def box_plot(self, data, clf, clf_name, output_folder,subset = 'train'):
-        plt.figure(figsize=(18, 16))
-        df = data
-        sns.boxplot(data=df)
-        plt.title(f'Box plot')
-        plt.tight_layout()
-        plt.xticks(rotation = 90)
-        plt.yticks(rotation=0)
-        plt.savefig(os.path.join(output_folder, f"{clf_name} {clf} Box plot_{subset}.png"))
-        plt.close()
+plt.figure(figsize=(10, 8), dpi=150)
 
-    def cat_plot(self, data, clf, clf_name, output_folder, subset = 'train'):
-        plt.figure(figsize=(18, 16))
-        # df = pd.DataFrame(data)
-        x = data.drop(columns = ['class'])
-        y = data['class']
-        sns.catplot(data=x, kind='box', height=8, aspect='auto')     
-        plt.title(f'Categorical Plot')
-        plt.xlabel('X')
-        plt.ylabel('y')
-        plt.xticks(rotation = 90)
-        plt.yticks(rotation=0)
-        plt.tight_layout()
-        plt.savefig(os.path.join(output_folder, f"{clf_name} {clf} catplot {subset}.png"))
-        plt.close()
+"""Iterate through the rows and plot ROC curves based on three parameters, classifier, FS, and Scaling method"""
+for index, row in data.iterrows():
+    classifier = row['Classifier']
+    feature_selection = row['Feature Selection']
+    scaling = row['Scaling Method']
     
+    """Retrieve the TPR and FPR lists for both train and test"""
+    # fpr_train = row['FPR_train']
+    # tpr_train = row['TPR_train']
 
-    """Kernel Density Estimation plot"""
-    def kdeplot(sefl, data, clf, clf_name, output_folder, subset='train'):
-        plt.figure(figsize=(18, 16))
-        x = data.drop(columns=['class'])
-        y = data['class']
-        sns.kdeplot(data=x, common_norm=False, cbar=True)
-        plt.title(f'kde plot')
-        plt.tight_layout()
-        plt.xticks(rotation = 90)
-        plt.yticks(rotation=0)
-        plt.savefig(os.path.join(output_folder, f"{clf_name} {clf} kdeplot {subset}.png"))
-        plt.close()
+    fpr_test = row['FPR_Test']
+    tpr_test = row['TPR_Test']
+    
+    """Retrieve the ROC-AUC values for train and test"""
+    # auc_train = row['ROC-AUC Train']
+    auc_test = row['ROC-AUC Test']
+    
+    # plt.plot(fpr_train, tpr_train, label=f'{classifier} {feature_selection} {scaling} (AUC = {auc_train:.2f})', lw=2.25)
+    plt.plot(fpr_test, tpr_test, label=f'{classifier} {feature_selection} {scaling} (AUC = {auc_test:.2f})', lw=2.5)
+
+plt.plot([0, 1], [0, 1], 'k--')
+plt.xlabel('FPR')
+plt.ylabel('TPR')
+plt.title('ROC Curve')
+plt.legend(loc='lower right')
+plt.savefig(f"D:\File\Results\Combined AUC-ROC curve.png")
+plt.show()
 
 
-    """Histogram plot """
-    def histoplot(self, data, clf, clf_name, output_folder, subset = 'train'):
+"""This code is to plot a heatmap for every metric."""
+"""After Saving the results of implementing ML model on data in a .csv file, we can use this code to have heatmap plot of each Metric that we want.
+Here, just we give the path of final file, and then specify the metric that we want to have heatmap of that. 
+"""
+
+output_folder = f'Specify the path to see the plots' 
+data = pd.read_csv("Final results path")
+
+def heatmap_of_results(data, output_folder):
+
+    metric = 'Accuracy Test'      # YlGn
+    # metric = 'Sensitivity Test'   # GnBu
+    # metric = 'Specificity Test'   # Wistia
+    # metric = 'ROC-AUC Test'     # YlOrBr
+    data['combination'] = data['Classifier'] + ' \ ' + data['Scaling Method']
+    data.set_index('combination', inplace = True)
         
-        x = data.drop(columns = ['class'])
-        y = data['class']
-        plt.figure(figsize=(18, 16), dpi=300)
-        sns.histplot(data=x) 
-        plt.title("Histogram plot")
-        plt.tight_layout()
-        plt.xticks(rotation = 90)
-        plt.yticks(rotation=0)
-        plt.savefig(os.path.join(output_folder, f"{clf_name} {clf} hist plot {subset}.png")) 
-        plt.close()
-
-
-    """Empirical CDF plot"""
-    def ecdf_plot(self, data, clf, clf_name, output_folder, subset = 'train'):
-        plt.figure(figsize=(18, 16))
-        x = data.drop(columns = ['class'])
-        y = data['class']
-        sns.ecdfplot(data=x)
-        plt.title("ecdf plot")
-        plt.tight_layout()
-        plt.savefig(os.path.join(output_folder, f'{clf_name} {clf} ecdf plot_{subset}.png'))
-        plt.close()
-
-
-
+    pivot_data = data.pivot_table(index='combination', columns='Feature Selection', values=metric)
+    if isinstance(pivot_data.columns, pd.MultiIndex):
+        pivot_data.columns = pivot_data.columns.get_level_values(1)
+                
+    plt.figure(figsize=(24, 22), dpi=220)
+    sns.heatmap(pivot_data, annot=True, cmap='YlGn', cbar=True, center=.85, square=True,        
+                    linewidths=1, linecolor='white', fmt=".2g", annot_kws={"fontsize": 11, 'fontstyle': 'normal', 'color': 'black', "weight": "bold", "family": "serif"})
+    plt.title(f'{metric}', fontsize=13, fontdict={'weight':'bold'})
+    plt.xlabel('Feature Selector', fontsize=18, fontdict={'fontstyle': 'normal', 'color': 'black', "weight": "bold"})
+    plt.ylabel('Classifiers', fontsize=22, fontdict={'fontstyle': 'normal', 'color': 'black', "weight": "bold"})
+    plt.xticks(rotation=90, fontsize=14)
+    plt.yticks(rotation=0, fontsize=15)
+    plt.tight_layout(pad=3.0)
+        
+    plt.savefig(os.path.join(output_folder, f"All Results of {metric}.png"))
+    plt.show()
+    plt.close()
