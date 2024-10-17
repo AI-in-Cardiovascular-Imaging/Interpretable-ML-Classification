@@ -25,8 +25,7 @@ class Classifiers:
             "Extra tree": ExtraTreesClassifier(),
             'Bagging':BaggingClassifier(),
             'Gboost': GradientBoostingClassifier(),                                        
-            # 'Xgboost': xgb.XGBClassifier(),      
-            # 'Stacking':StackingClassifier(estimators=[('rf', RandomForestClassifier(n_estimators=15))]), 
+            'Xgboost': xgb.XGBClassifier(),      
         }   
 
     def initialize_param_grids(self):
@@ -48,6 +47,5 @@ class Classifiers:
             "Extra tree": {"classifier__n_estimators": [int(x) for x in np.linspace(start=10, stop=1000, num=10)], "classifier__max_features": max_features_extra},
             "Bagging":{"classifier__n_estimators":[int(x) for x in np.linspace(start=2, stop=500, num=15 )]},
             "Gboost": {"classifier__n_estimators": n_estimators, "classifier__learning_rate": learning_rate, "classifier__max_depth": max_depth, "classifier__subsample": [0.8, 0.9, 1.0]},   
-            # "Xgboost":{},          # NEW added
-            # "Stacking":{},
+            "Xgboost":{},   
         }
