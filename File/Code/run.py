@@ -8,6 +8,7 @@ import pandas as pd
 
 if __name__=="__main__":
 
+    """Insert the file path"""
     file_path = pd.read_csv('/File/Files/df_rest.csv')                           
     # file_path = pd.read_csv('/File/Files//df_stress.csv')
     # file_path = pd.read_csv('/File/Files/merge_of_all_data.csv')
