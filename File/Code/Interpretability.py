@@ -31,17 +31,14 @@ class Interpret:
     
     def load(self):
         """pkl load here"""
-        # train = pd.read_csv("F:\\Final Results\\model output\\RandomSearch_Combined_Data_Z_score\\LogisticRegression(max_iter=10000, tol=0.1)\\Lr Select from Model selected features train.csv")     # Combined_zscore_randomsearch
-        # train = pd.read_csv("F:\\Final Results\\model output\\Random Search_Zscore_Stress Data\\KNeighborsClassifier()\\Knn Select from Model selected features train.csv")         # Stress_zscor_Randomsearch
-        train = pd.read_csv("F:\\Final Results\\model output\\Random Search_IQR_Rest Data 2\\LogisticRegression(max_iter=10000, tol=0.1)\\Lr Pca selected features train.csv")          # Rest_iqr_RandomSearch
+        # train = pd.read_csv("F:\\Final Results\\model output\\RandomSearch_Combined_Data_Z_score\\LogisticRegression(max_iter=10000, tol=0.1)\\Lr Select from Model selected features train.csv")     # Train file
+        
         X_train = train.drop(columns=['class'])
         y_train = train['class']
         self.X_train = X_train
         self.y_train = y_train
 
-        # test = pd.read_csv("F:\\Final Results\\model output\\RandomSearch_Combined_Data_Z_score\\LogisticRegression(max_iter=10000, tol=0.1)\\Lr Select from Model selected features test.csv")       # Combined
-        # test = pd.read_csv("F:\\Final Results\\model output\\Random Search_Zscore_Stress Data\\KNeighborsClassifier()\\Knn Select from Model selected features test.csv")           # Stress_zscore_Randomsearch
-        test = pd.read_csv("F:\\Final Results\\model output\\Random Search_IQR_Rest Data 2\\LogisticRegression(max_iter=10000, tol=0.1)\\Lr Pca selected features test.csv")           # Rest_iqr_RandomSearch
+        # test = pd.read_csv("F:\\Final Results\\model output\\RandomSearch_Combined_Data_Z_score\\LogisticRegression(max_iter=10000, tol=0.1)\\Lr Select from Model selected features test.csv")       # Test file 
         X_test = test.drop(columns=['class'])
         y_test = test['class']
         self.X_test = X_test
@@ -53,12 +50,12 @@ class Interpret:
         self.model.fit(self.X_train, self.y_train)
         return self.model
 
-    """self.explainer = shap.TreeExplainer(self.model, shap.sample(self.X_train, 100))      # Tree-based algorithms"""    
+    """self.explainer = shap.TreeExplainer(self.model, shap.sample(self.X_train, 100))      # Tree-based algorithms""" 
+    """ This function is defined to try different SHAP explainers, but here just simple explainer is tried """ 
     def Explainer(self):
-
         methods = ['shap', 'Kernel_shap', 'Partition_shap', 'Permutation_shap']
         if self.method == 'shap':
-            self.explainer = shap.Explainer(self.model.predict, shap.sample(self.X_train, 35)) 
+            self.explainer = shap.Explainer(self.model.predict, shap.sample(self.X_train, 35))
             
             shap_values = self.explainer(self.X_test)   # Calculating Shap_values
             self.shap_values = shap_values
@@ -76,7 +73,7 @@ class Interpret:
             self.max_shap_feature = self.X_test.columns[max_shap_feature_index]
             print("Feature with Maximum Shap Value is: ", self.max_shap_feature)
             
-            
+        """ To implement KernelExplainer"""
         elif self.method == 'shap_kernel':
             self.explainer = shap.KernelExplainer(self.model.predict, shap.sample(self.X_train, 35))
             shap_values = self.explainer(self.X_test)   # Calculating Shap_values
@@ -95,7 +92,7 @@ class Interpret:
             self.max_shap_feature = self.X_test.columns[max_shap_feature_index]
             print("Feature with Maximum Shap Value is: ", self.max_shap_feature)
             
-        
+        """ To implement LIME """
         elif self.method == 'lime':
             lime_explainer = lime_tabular.LimeTabularExplainer(self.X_train.values,
                                                    feature_names=self.X_train.columns, feature_selection='auto',
@@ -131,22 +128,12 @@ class Interpret:
         
         # Create a SHAP dependence scatter plot, colored by an interaction feature.
         shap.plots.scatter(self.shap_values[:, self.max_shap_feature], color = self.shap_values, alpha=0.6)     # scatter plot for highest value of Shap value
-        
-        """a scatter plot that we don't know the name of feature, and we just want to plot the important feature plot"""
-        # shap.plots.scatter(self.shap_values[:, self.shap_values.abs.mean(0).argsort[-1]])
-        
-        """Scatter plot of all featues by shap_values"""
-        shap.plots.scatter(self.shap_values, ylabel="SHAP value\n(higher means more likely)")  
-        plt.xticks(rotation=90)
-        plt.show()
-
 
         """Decision Plot of Shap_Values"""
         range1= range(len(self.X_test))
         shap_values_array = self.shap_values.values if isinstance(self.shap_values, shap.Explanation) else self.shap_values
         shap.decision_plot(self.expected_value, shap_values_array[range1], features=self.X_test, feature_names=self.X_test.columns.tolist()) # , link="logit"
 
-        
         """Force Plot. Visualize the given SHAP values with an additive force layout."""
         base_value = self.shap_values.base_values
         if self.shap_values is not None:
@@ -215,9 +202,7 @@ class Interpret:
     
 def interpretability_main():
     
-    # file_path = "F:\\Final Results\\pkl\\RandomSearch_Combined_data_Z_score pkl\\Lr Select from Model RobustScaler best_model.pkl"      # Combined
-    # file_path = "F:\\Final Results\\pkl\\RandomSearch_Zscore_Stress pkl\\Knn Select from Model MinMax best_model.pkl"                      # Stress
-    file_path = "F:\\Final Results\\pkl\\Random Search_IQR_Rest pkl2\\Lr Pca Standard best_model.pkl"                               # Rest_iqr_randomsearch
+    file_path = "Path of .pkl file"
 
     with open(file_path, 'rb') as file:
         model = joblib.load(file)
