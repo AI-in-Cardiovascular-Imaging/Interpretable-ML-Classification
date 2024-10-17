@@ -1,6 +1,7 @@
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 import pandas as pd
 
+""" Different Scaling methods are defined"""
 class Scaling:
     def __init__(self, method):
         self.method = method
