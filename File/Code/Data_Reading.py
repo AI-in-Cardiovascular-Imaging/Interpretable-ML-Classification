@@ -6,7 +6,7 @@ import logging
 import seaborn as sns 
 import matplotlib.pyplot as plt
 
-
+"""This method reads the uploaded data and if it is not fram, changes to frame. """
 class DataLoader:
     """Reads Excel, CSV, or DataFrame and returns a DataFrame."""
     def __init__(self, file_path):
