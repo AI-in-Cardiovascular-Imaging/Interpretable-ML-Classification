@@ -57,7 +57,6 @@ class SearchMethod:
         self.prepared_data = pd.read_csv(file_path)
         self.classifier_obj = Classifiers()
         self.split_data()
-        # self.preprocess_data()
         self.search_algorithm()
 
 
@@ -87,9 +86,9 @@ class SearchMethod:
                     print(f"Pipeline steps: {pipeline.steps}")      
                     cv = ShuffleSplit(n_splits=10, random_state=2)
                     if self.method == "GridSearch":
-                        search_algorithm = GridSearchCV(pipeline, param_grid=self.classifier_obj.param_grids[clf_name], cv=cv, n_jobs=1)  
+                        search_algorithm = GridSearchCV(pipeline, param_grid=self.classifier_obj.param_grids[clf_name], cv=cv, n_jobs=-1)  
                     elif self.method == "RandomSearch":
-                        search_algorithm = RandomizedSearchCV(pipeline, param_distributions=self.classifier_obj.param_grids[clf_name], cv=cv, n_jobs=1) 
+                        search_algorithm = RandomizedSearchCV(pipeline, param_distributions=self.classifier_obj.param_grids[clf_name], cv=cv, n_jobs=-1) 
                     else:
                         raise ValueError("Unknown search algorithm")
                     search_algorithm.fit(self.X_train, self.y_train)
@@ -98,7 +97,7 @@ class SearchMethod:
                     run_time = end_time - start_time  
                     self.run_times.append(run_time)
                     
-                    output_folder = f'/File/Results/{clf}'      
+                    output_folder = f'/File/Results/{clf}'          # path to save the results
                     os.makedirs(output_folder, exist_ok=True)
                     self.evaluate_on_train(search_algorithm, feature_selection, output_folder, clf_name, scaling_method)
 
@@ -106,7 +105,7 @@ class SearchMethod:
                     self.save_result_to_json(clf_name, output_folder, feature_selection)
 
                     """save .pkl file of each classifier"""
-                    pkl_path = f'/File/pkl_files' 
+                    pkl_path = f'/File/pkl_files'                    # path to save .pkl file for each train
 
                     """save the result of trained models with parameters"""
                     self.best_estimator = search_algorithm.best_estimator_
@@ -128,7 +127,7 @@ class SearchMethod:
         train_accuracy = accuracy_score(self.y_train, y_pred_train)
         best_params_train = search_algorithm.best_params_
         TN, FP, FN, TP = cm_train.ravel()     
-        run_time = self.run_times[-1]         
+        run_time = self.run_times[-1]                 # To measure train run time 
         imputation_strategy = 'mean'
         scaling_method = scaling_method
 
@@ -215,7 +214,7 @@ class SearchMethod:
         self.roc_train_all[clf] = (fpr_train, tpr_train, auc_roc_train)                           
         self.precision_recall_train_all[clf] = (precision_train, recall_train)      
 
-        """Different plots of output values"""
+        """Different plots function of Plotting class can be called here."""
         plotting = Plotting()
         plotting.roc_curve_combined(clf_name, self.roc_train_all, output_folder, subset='train')       
         plotting.precision_recall_combined(clf_name, self.precision_recall_train_all, output_folder, subset='train')
@@ -393,7 +392,7 @@ class SearchMethod:
             json.dump(combined_results, json_file, indent=4)
 
     """Save the final results in a .csv file and plot outputs in different heatmap plots"""
-    def merge_and_save_to_csv(self):        # clf_name removed
+    def merge_and_save_to_csv(self):     
         train_df = pd.DataFrame(self.train_results_csv_list)
         test_df = pd.DataFrame(self.test_results_csv_list)
         
@@ -408,19 +407,6 @@ class SearchMethod:
         filename = f"Final_Results.csv"
         filepath = os.path.join(output_folder, filename)
         combined_df.to_csv(filepath, index=False)
-
-
-        # Acc = ['Accuracy Test']
-        # Plotting.heatmap_of_results_of_metric(combined_df, Acc, output_folder)
-
-        # Spe = ['Specificity Test']
-        # Plotting.heatmap_of_results_of_metric(combined_df, Spe, output_folder)
-
-        # Sen = ['Sensitivity Test']
-        # Plotting.heatmap_of_results_of_metric(combined_df, Sen, output_folder)
-
-        # AUC = ['ROC-AUC Test']
-        # Plotting.heatmap_of_results_of_metric(combined_df, AUC, output_folder)
 
         # metrics = ['Accuracy Test', 'Sensitivity Test', 'Specificity Test', 'ROC-AUC Test']
         # Plotting.heatmap_of_results(combined_df, metrics, output_folder)
@@ -445,7 +431,7 @@ class main_pipeline:
         pipeline = Pipeline(steps=[
             ('imputation_method', imputation(strategy='mean')),
             ('scaling_method', Scaling(method=scaling_method)),
-            ('feature_selection', FeatureSelector(method=feature_selection, n_features=35)),
+            ('feature_selection', FeatureSelector(method=feature_selection, n_features=35)),    # Specify the number of features 
             ("classifier", classifier)
         ])
         return pipeline
@@ -456,5 +442,5 @@ def main_search():
     search = SearchMethod(file_path)
     search.display_results_train()
     search.display_results_test()
-    search.merge_and_save_to_csv()          # 'classifier' removed
+    search.merge_and_save_to_csv()         
 
