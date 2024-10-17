@@ -1,7 +1,7 @@
 from sklearn.impute import SimpleImputer
 import pandas as pd
 
-"""Imputation method"""
+"""Imputation methods are defined, but because of numerical data, just 'mean' strategy used in main class for imputation"""
 class imputation:
     def __init__(self, strategy='Mean'):
         self.set_strategy(strategy)
